@@ -46,6 +46,11 @@ async def part2_guardrails():
     print("PART 2: Guardrails")
     print("=" * 60)
 
+    # BONUS Layer 0: Unicode Normalization — strip invisible characters first
+    print("\n--- BONUS Layer 0: Unicode Normalizer ---")
+    from guardrails.unicode_normalizer import test_unicode_normalizer
+    test_unicode_normalizer()
+
     # Part 2A: Input guardrails
     print("\n--- Part 2A: Input Guardrails ---")
     from guardrails.input_guardrails import (
@@ -85,10 +90,11 @@ async def part3_testing():
 
     from testing.testing import run_comparison, print_comparison, SecurityTestPipeline
     from agents.agent import create_unsafe_agent
+    from guardrails.unicode_normalizer import UnicodeNormalizerPlugin
 
-    # TODO 10: Before vs after comparison
+    # TODO 10: Before vs after comparison (now with Unicode normalizer as first layer)
     print("\n--- TODO 10: Before/After Comparison ---")
-    unprotected, protected = await run_comparison()
+    unprotected, protected = await run_comparison(unicode_plugin=UnicodeNormalizerPlugin())
     if unprotected and protected:
         print_comparison(unprotected, protected)
     else:

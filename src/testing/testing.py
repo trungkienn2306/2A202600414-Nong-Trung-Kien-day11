@@ -27,8 +27,12 @@ from guardrails.output_guardrails import OutputGuardrailPlugin, _init_judge
 # 4. Build a comparison table (before vs after)
 # ============================================================
 
-async def run_comparison():
+async def run_comparison(unicode_plugin=None):
     """Run attacks against both unprotected and protected agents.
+
+    Args:
+        unicode_plugin: Optional UnicodeNormalizerPlugin to add as the
+                        first layer of the protected agent (Bonus Layer 6).
 
     Returns:
         Tuple of (unprotected_results, protected_results)
@@ -49,8 +53,16 @@ async def run_comparison():
     input_plugin = InputGuardrailPlugin()
     output_plugin = OutputGuardrailPlugin(use_llm_judge=False)
     _init_judge()  # Initialise judge runner (no-op if judge disabled above)
+
+    # Build plugin list: Unicode normalizer runs FIRST (Layer 0) so that
+    # invisible characters are stripped before any regex pattern matching.
+    plugins = []
+    if unicode_plugin is not None:
+        plugins.append(unicode_plugin)
+    plugins.extend([input_plugin, output_plugin])
+
     protected_agent, protected_runner = create_protected_agent(
-        plugins=[input_plugin, output_plugin]
+        plugins=plugins
     )
     protected_results = await run_attacks(protected_agent, protected_runner)
 
